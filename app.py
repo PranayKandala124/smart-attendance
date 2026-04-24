@@ -48,9 +48,8 @@ ROLL_PATTERN = re.compile(r"^[A-Za-z0-9]+$")
 session_lock   = threading.Lock()
 session_state  = {"session_token": None, "started_at": 0, "active": False}
 
-# ── DATABASE ──────────────────────────────────────────────────────────────────
-def get_db():
-    c = sqlite3.connect(DB_PATH)
+# ── DATABASE ──────────────────────────────────────────────────────────────────def get_db():
+    c = sqlite3.connect(DB_PATH, timeout=10)
     c.row_factory = sqlite3.Row
     return c
 
@@ -308,15 +307,26 @@ def faculty_signup():
         password = request.form["password"]
         if not valid_pw(password):
             return render_template("faculty_signup.html", error="Weak password.")
-        try:
-            c = get_db()
-            c.execute("INSERT INTO faculty(username,password) VALUES(?,?)",
-                      (username, hash_pw(password)))
-            c.commit(); c.close()
-            return redirect("/faculty_login")
-        except sqlite3.IntegrityError:
-            return render_template("faculty_signup.html", error="Username already taken.")
-    return render_template("faculty_signup.html")
+try:
+    c = get_db()
+    cur = c.cursor()
+
+    cur.execute(
+        "INSERT INTO faculty(username,password) VALUES(?,?)",
+        (username, hash_pw(password))
+    )
+
+    c.commit()
+    c.close()
+
+    return redirect("/faculty_login")
+
+except sqlite3.IntegrityError:
+    return render_template("faculty_signup.html", error="User already exists")
+
+except Exception as e:
+    print("ERROR:", e)
+    return "Something went wrong"
 
 @app.route("/faculty_login", methods=["GET", "POST"])
 def faculty_login():
