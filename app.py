@@ -217,7 +217,7 @@ def generate_student_qr(roll_no):
     c.close()
 
     # Build URL
-    base_url = os.environ.get("BASE_URL", "https://transarctic-decreasingly-natalia.ngrok-free.dev")
+    base_url = os.environ.get("BASE_URL", "https://smart-attendance-786f.onrender.com")
     url = f"{base_url}/mark_student/{token}"
 
     # Generate QR image
