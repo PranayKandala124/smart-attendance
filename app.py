@@ -303,8 +303,8 @@ def student_login():
 @app.route("/faculty_signup", methods=["GET", "POST"])
 def faculty_signup():
     if request.method == "POST":
-        username = request.form["username"].strip()
-        password = request.form["password"]
+      username = request.form.get("username", "").strip()
+password = request.form.get("password", "")
         if not valid_pw(password):
             return render_template("faculty_signup.html", error="Weak password.")
 try:
@@ -331,8 +331,7 @@ except Exception as e:
 @app.route("/faculty_login", methods=["GET", "POST"])
 def faculty_login():
     if request.method == "POST":
-        username = request.form["username"].strip()
-        password = request.form["password"]
+        
         c = get_db()
         u = c.execute("SELECT * FROM faculty WHERE username=?", (username,)).fetchone()
         c.close()
