@@ -333,16 +333,26 @@ def faculty_signup():
 @app.route("/faculty_login", methods=["GET", "POST"])
 def faculty_login():
     if request.method == "POST":
-        
+
+        # ✅ FIX: define variables
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+
         c = get_db()
-        u = c.execute("SELECT * FROM faculty WHERE username=?", (username,)).fetchone()
+        u = c.execute(
+            "SELECT * FROM faculty WHERE username=?",
+            (username,)
+        ).fetchone()
         c.close()
+
         if u and check_pw(password, u["password"]):
             session.permanent = True
             session["faculty"] = username
-            generate_session()  # Start a new session on login
+            generate_session()
             return redirect("/faculty_dashboard")
+
         return render_template("faculty_login.html", error="Invalid credentials.")
+
     return render_template("faculty_login.html")
 
 # ── FACULTY DASHBOARD ─────────────────────────────────────────────────────────
