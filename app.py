@@ -49,7 +49,9 @@ session_lock   = threading.Lock()
 session_state  = {"session_token": None, "started_at": 0, "active": False}
 
 # ── DATABASE ──────────────────────────────────────────────────────────────────def get_db():
-    c = sqlite3.connect(DB_PATH, timeout=10)
+# ── DATABASE ─────────────────────────────────────────
+def get_db():
+    c = sqlite3.connect(DB_PATH, timeout=30, check_same_thread=False)
     c.row_factory = sqlite3.Row
     return c
 
