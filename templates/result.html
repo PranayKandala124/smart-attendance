@@ -1,0 +1,19 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>Result | SmartAttend</title><link rel="stylesheet" href="{{ url_for('static',filename='style.css') }}"/></head>
+<body><div class="page-wrap">
+<nav class="navbar"><a href="/" class="nav-brand"><div class="brand-ring">📡</div>Smart<span class="brand-acc">Attend</span></a><div class="nav-links"><a href="/student_dashboard" class="nl">Dashboard</a><a href="/logout" class="nl nl-d">Logout</a></div></nav>
+<div class="result-pg">
+  <div class="result-box {% if color=='green' %}r-ok{% elif color=='red' %}r-err{% else %}r-warn{% endif %} a1">
+    <span class="ri-big">{% if color=='green' %}✅{% elif color=='red' %}❌{% else %}⚠️{% endif %}</span>
+    <h2 class="{% if color=='green' %}tc-g{% elif color=='red' %}tc-r{% else %}tc-o{% endif %}">{{ message }}</h2>
+    <p>{{ sub if sub else ('Your attendance was successfully recorded.' if color=='green' else 'Please contact your faculty.') }}</p>
+    {% if color=='green' %}
+    <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:999px;padding:5px 14px;font-size:.79rem;color:var(--green);margin-bottom:22px;">
+      ⏱ Marked at <span id="mtime">—</span>
+    </div><br/>{% endif %}
+    <div class="result-actions"><a href="/student_dashboard" class="btn btn-o">← Dashboard</a><a href="/logout" class="btn btn-gh">Logout</a></div>
+  </div>
+</div>
+<footer class="footer"><span>© 2025 SmartAttend</span><a href="/">Home</a></footer>
+</div>
+<script>const t=new Date();const pad=n=>String(n).padStart(2,'0');const el=document.getElementById('mtime');if(el)el.textContent=pad(t.getHours())+':'+pad(t.getMinutes())+':'+pad(t.getSeconds())+' IST';</script>
+</body></html>

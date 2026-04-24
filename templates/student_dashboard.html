@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Dashboard | SmartAttend</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+</head>
+<body>
+<div class="page-wrap">
+
+  <nav class="navbar">
+    <a href="/" class="nav-brand"><div class="brand-ring">📡</div>Smart<span class="brand-acc">Attend</span></a>
+    <div class="nav-links">
+      <span class="roll-badge" style="font-size:.78rem;">{{ session.roll_no }}</span>
+      <span style="font-size:.82rem;color:var(--text2);padding:0 8px;">{{ session.student_name }}</span>
+      <a href="/logout" class="nl nl-d">Logout</a>
+    </div>
+  </nav>
+
+  <div class="main">
+
+    <!-- HEADER -->
+    <div class="ph a1">
+      <h1>Student Dashboard</h1>
+      <p>Welcome, <strong>{{ session.student_name }}</strong> — Roll No: <span style="font-family:var(--mono);color:var(--accent);font-weight:700;">{{ session.roll_no }}</span></p>
+    </div>
+
+    <!-- MY STATS -->
+    <div class="section2 a2" style="padding-top:0;">
+      <div class="g4">
+        <div class="stat-card">
+          <div class="stat-icon ic-b">🎓</div>
+          <div class="stat-val sv-m" style="font-size:1rem;color:var(--accent);">{{ session.roll_no }}</div>
+          <div class="stat-lbl">Your Roll Number</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon ic-g">✅</div>
+          <div class="stat-val sv-g">{{ my_present }}</div>
+          <div class="stat-lbl">Days Present</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon ic-o">⏰</div>
+          <div class="stat-val sv-o">{{ my_late }}</div>
+          <div class="stat-lbl">Days Late</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon ic-p">📊</div>
+          <div class="stat-val" style="color:var(--purple);">{{ my_pct }}%</div>
+          <div class="stat-lbl">Attendance Rate</div>
+          <div class="prog-bar"><div class="prog-fill" style="width:{{ my_pct }}%;"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TODAY STATUS -->
+    {% if today_marked %}
+    <div class="section2" style="padding-top:0;">
+      <div class="alert {% if today_marked == 'Present' %}a-ok{% elif today_marked == 'Late' %}a-warn{% else %}a-err{% endif %}">
+        {% if today_marked == 'Present' %}✅{% elif today_marked == 'Late' %}⏰{% else %}❌{% endif %}
+        Today's attendance already recorded as <strong>{{ today_marked }}</strong>. See you next class!
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="div"></div>
+
+    <!-- MAIN: SCANNER + STEPS -->
+    <div class="section a3">
+      <div style="display:grid;grid-template-columns:380px 1fr;gap:44px;align-items:start;" class="dash-split">
+
+        <!-- SCANNER PANEL -->
+        <div>
+          <p class="stitle">Mark Your Attendance</p>
+          <p class="ssub">Scan the QR that faculty generated <strong>specifically for your roll number {{ session.roll_no }}</strong></p>
+
+          <!-- GPS BAR -->
+          {% if gps_enabled %}
+          <div class="gps-bar" id="gpsBar">
+            <div class="gps-dot checking" id="gpsDot"></div>
+            <span id="gpsText">Checking your location...</span>
+          </div>
+          {% endif %}
+
+          <!-- IMPORTANT NOTE -->
+          <div class="alert a-info" style="margin-bottom:14px;align-items:flex-start;gap:8px;">
+            <span style="font-size:1rem;flex-shrink:0;">📌</span>
+            <span style="font-size:.8rem;line-height:1.6;">Only scan the QR generated for your roll number <strong>{{ session.roll_no }}</strong>. Scanning someone else's QR will be rejected by the system.</span>
+          </div>
+
+          <!-- IDLE STATE -->
+          <div class="scanner-box" id="scanIdle">
+            <div class="scan-icon">📷</div>
+            <h3>Scan Your QR Code</h3>
+            <p>Faculty will show a QR code labelled with your roll number <strong style="color:var(--accent);">{{ session.roll_no }}</strong>. Click below to scan it.</p>
+            {% if today_marked %}
+            <div style="padding:9px 14px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.22);border-radius:var(--r);font-size:.81rem;color:var(--green);">
+              ✅ Already marked today as <strong>{{ today_marked }}</strong>
+            </div>
+            {% else %}
+            <button class="btn btn-p" onclick="startScan()" id="startBtn">📷 Open Camera &amp; Scan</button>
+            {% endif %}
+            <p style="font-size:.73rem;color:var(--text3);">Camera permission required</p>
+          </div>
+
+          <!-- SCANNER ACTIVE -->
+          <div id="scanActive" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:var(--r3);padding:20px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:13px;">
+              <div><p style="font-size:.9rem;font-weight:700;">📷 Camera Active</p><p style="font-size:.76rem;color:var(--text2);">Point at QR for roll: <strong style="color:var(--accent);">{{ session.roll_no }}</strong></p></div>
+              <button class="btn btn-gh" onclick="stopScan()" style="font-size:.76rem;padding:7px 12px;">✕ Stop</button>
+            </div>
+            <div id="reader"></div>
+            <div id="scanMsg" style="margin-top:11px;font-size:.81rem;text-align:center;min-height:20px;color:var(--text2);"></div>
+          </div>
+
+          <!-- RESULT -->
+          <div id="scanResult" style="display:none;border-radius:var(--r3);padding:22px;text-align:center;margin-top:4px;"></div>
+        </div>
+
+        <!-- HOW IT WORKS -->
+        <div>
+          <p class="stitle">How Per-Student QR Works</p>
+          <p class="ssub">Your unique QR eliminates proxy attendance</p>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div class="step-card">
+              <div class="step-num">1</div>
+              <div class="step-body"><h3>Faculty Enters Your Roll No</h3><p>Faculty types your roll number <strong style="color:var(--accent);">{{ session.roll_no }}</strong> in the dashboard and clicks "Generate QR".</p></div>
+            </div>
+            <div class="step-card">
+              <div class="step-num">2</div>
+              <div class="step-body"><h3>Unique QR is Generated</h3><p>The system creates a one-time token linked <em>specifically</em> to your roll number. No one else can use it.</p></div>
+            </div>
+            {% if gps_enabled %}
+            <div class="step-card">
+              <div class="step-num sn-p">3</div>
+              <div class="step-body"><h3>Location is Verified</h3><p>Your GPS location is checked. You must be within {{ campus_radius|int }}m of campus. Marking from home is blocked.</p></div>
+            </div>
+            {% endif %}
+            <div class="step-card">
+              <div class="step-num sn-g">{{ '4' if gps_enabled else '3' }}</div>
+              <div class="step-body"><h3>Scan &amp; Mark</h3><p>Scan the QR labelled with your roll number. The system verifies you're logged in as <strong>{{ session.roll_no }}</strong>.</p></div>
+            </div>
+            <div class="step-card">
+              <div class="step-num sn-o">!</div>
+              <div class="step-body"><h3>Single-Use · {{ qr_interval }}s Expiry</h3><p>Each QR is single-use and expires in {{ qr_interval }} seconds. Sharing a screenshot is useless — it will be rejected.</p></div>
+            </div>
+          </div>
+
+          <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--border);display:flex;gap:10px;flex-wrap:wrap;">
+            <a href="/logout" class="btn btn-gh">🔓 Logout</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <footer class="footer">
+    <span>© 2025 SmartAttend Professional</span>
+    <span id="footerTime">—</span>
+  </footer>
+</div>
+
+<script>
+const QR_INTERVAL = {{ qr_interval }};
+const GPS_ENABLED = {{ 'true' if gps_enabled else 'false' }};
+let userLat=null, userLng=null, gpsOk=!GPS_ENABLED;
+
+function pad(n){return String(n).padStart(2,'0');}
+function tick(){
+  const now=new Date();
+  const el=document.getElementById('footerTime');
+  if(el)el.textContent=now.toLocaleDateString('en-IN',{weekday:'short',day:'2-digit',month:'short',year:'numeric'})+' · '+pad(now.getHours())+':'+pad(now.getMinutes())+':'+pad(now.getSeconds())+' IST';
+}
+tick(); setInterval(tick,1000);
+
+// GPS check
+if(GPS_ENABLED){
+  navigator.geolocation.getCurrentPosition(
+    pos=>{
+      userLat=pos.coords.latitude; userLng=pos.coords.longitude;
+      fetch('/api/check_location',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lat:userLat,lng:userLng})})
+        .then(r=>r.json()).then(d=>{
+          const dot=document.getElementById('gpsDot');
+          const txt=document.getElementById('gpsText');
+          if(d.ok){dot.className='gps-dot ok';txt.textContent='✓ On campus — '+d.message;gpsOk=true;}
+          else{dot.className='gps-dot err';txt.textContent='✗ '+d.message;gpsOk=false;}
+        });
+    },
+    _=>{
+      const dot=document.getElementById('gpsDot');
+      const txt=document.getElementById('gpsText');
+      if(dot)dot.className='gps-dot err';
+      if(txt)txt.textContent='⚠ Location access denied — attendance may be blocked';
+    },
+    {enableHighAccuracy:true,timeout:10000}
+  );
+}
+
+// QR SCANNER
+let html5Qr=null, scanned=false;
+
+function startScan(){
+  if(GPS_ENABLED && !gpsOk){
+    alert('Location must be verified first. Please allow GPS access and try again.');
+    return;
+  }
+  document.getElementById('scanIdle').style.display='none';
+  document.getElementById('scanActive').style.display='block';
+  scanned=false;
+  html5Qr=new Html5Qrcode("reader");
+  html5Qr.start(
+    {facingMode:"environment"},
+    {fps:10,qrbox:{width:220,height:220}},
+    onScan, ()=>{}
+  ).catch(err=>{
+    document.getElementById('scanMsg').innerHTML='<span style="color:var(--red);">Camera error: '+err+'</span>';
+  });
+}
+
+function stopScan(){
+  if(html5Qr&&html5Qr.isScanning){
+    html5Qr.stop().then(()=>{
+      document.getElementById('scanActive').style.display='none';
+      document.getElementById('scanIdle').style.display='flex';
+    });
+  }
+}
+
+function onScan(text){
+  if(scanned)return; scanned=true;
+  document.getElementById('scanMsg').innerHTML='<span style="color:var(--accent);">✓ QR detected! Verifying...</span>';
+  if(html5Qr&&html5Qr.isScanning)html5Qr.stop().catch(()=>{});
+  let url=text;
+  if(userLat&&userLng)url+=`?lat=${userLat}&lng=${userLng}`;
+  setTimeout(()=>{window.location.href=url;},600);
+}
+</script>
+</body>
+</html>

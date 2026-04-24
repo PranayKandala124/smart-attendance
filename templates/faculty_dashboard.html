@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Faculty Dashboard | SmartAttend</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="page-wrap">
+
+  <nav class="navbar">
+    <a href="/" class="nav-brand"><div class="brand-ring">📡</div>Smart<span class="brand-acc">Attend</span></a>
+    <div class="nav-links">
+      <a href="/report"   class="nl">Reports</a>
+      <a href="/graph"    class="nl">Analytics</a>
+      <a href="/students" class="nl">Students</a>
+      <a href="/export"   class="nl">Excel</a>
+      <a href="/export_pdf" class="nl">PDF</a>
+      <a href="/campus_config" class="nl">⚙ GPS</a>
+      <a href="/logout"   class="nl nl-d">Logout</a>
+    </div>
+  </nav>
+
+  <div class="main">
+
+    <!-- HEADER -->
+    <div class="ph a1">
+      <h1>Faculty Dashboard</h1>
+      <p><span class="live-dot"></span>Session active · GPS {% if gps_enabled %}on{% else %}off{% endif %} · Present &lt;{{ present_before }} / Late &lt;{{ late_before }} IST · QR valid {{ qr_interval }}s per student</p>
+    </div>
+
+    <!-- STAT CARDS -->
+    <div class="section2 a2" style="padding-top:0;">
+      <div class="g4">
+        <div class="stat-card">
+          <div class="stat-icon ic-b">👥</div>
+          <div class="stat-val sv-a">{{ total_students }}</div>
+          <div class="stat-lbl">Registered Students</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon ic-g">✅</div>
+          <div class="stat-val sv-g">{{ today_present }}</div>
+          <div class="stat-lbl">Present Today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon ic-o">⏰</div>
+          <div class="stat-val sv-o">{{ today_late }}</div>
+          <div class="stat-lbl">Late Today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon ic-p">📊</div>
+          <div class="stat-val" style="color:var(--purple);">{{ attendance_pct }}%</div>
+          <div class="stat-lbl">Today's Attendance Rate</div>
+          <div class="prog-bar"><div class="prog-fill" style="width:{{ attendance_pct }}%;"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="div"></div>
+
+    <!-- MAIN CONTENT: QR GENERATOR + CHARTS -->
+    <div class="section a3">
+      <div style="display:grid;grid-template-columns:420px 1fr;gap:40px;align-items:start;" class="dash-split">
+
+        <!-- QR GENERATOR PANEL -->
+        <div>
+          <p class="stitle">Generate Per-Student QR</p>
+          <p class="ssub">Enter a student's roll number to generate their unique, single-use QR code</p>
+
+          <div class="qr-gen-panel">
+            <!-- INPUT ROW -->
+            <div class="qr-input-row">
+              <div class="qr-input-wrap">
+                <label class="flbl">Roll Number</label>
+                <input class="finp roll-input" type="text" id="rollInput"
+                  placeholder="e.g. 24B81A3235"
+                  maxlength="10"
+                  oninput="this.value=this.value.toUpperCase()"
+                  onkeydown="if(event.key==='Enter')generateQR()"/>
+              </div>
+              <button class="btn btn-p" onclick="generateQR()" id="genBtn" style="height:42px;padding:0 20px;">
+                Generate QR
+              </button>
+            </div>
+
+            <!-- STATUS -->
+            <div class="qr-status idle" id="qrStatus">
+              Enter a roll number above and click Generate QR
+            </div>
+
+            <!-- QR DISPLAY -->
+            <div class="qr-display" id="qrDisplay">
+              <div class="qr-placeholder">
+                <div class="ph-icon">📷</div>
+                <span>QR will appear here</span>
+                <span style="font-size:.72rem;">Format: 24B81A3235</span>
+              </div>
+            </div>
+
+            <!-- RECENT QRs -->
+            <div id="recentQRs" style="margin-top:16px;display:none;">
+              <p class="flbl" style="margin-bottom:8px;">Recently Generated</p>
+              <div id="recentList" style="display:flex;flex-direction:column;gap:6px;max-height:160px;overflow-y:auto;"></div>
+            </div>
+          </div>
+
+          <!-- QUICK ACTIONS -->
+          <div style="margin-top:18px;">
+            <p class="stitle" style="margin-bottom:12px;">Quick Actions</p>
+            <div class="g2">
+              <a href="/report"   class="action-card"><div class="ac-ico">📋</div><div class="ac-ttl">Daily Report</div><div class="ac-desc">Today's full attendance list</div></a>
+              <a href="/report?mode=weekly" class="action-card"><div class="ac-ico">📅</div><div class="ac-ttl">Weekly Report</div><div class="ac-desc">Last 7 days data</div></a>
+              <a href="/students" class="action-card"><div class="ac-ico">👥</div><div class="ac-ttl">Student List</div><div class="ac-desc">All registered students + roll nos</div></a>
+              <a href="/campus_config" class="action-card"><div class="ac-ico">📍</div><div class="ac-ttl">Campus GPS</div><div class="ac-desc">Set campus center &amp; radius</div></a>
+            </div>
+          </div>
+        </div>
+
+        <!-- CHARTS -->
+        <div>
+          <p class="stitle" style="margin-bottom:4px;">Live Analytics</p>
+          <p class="ssub">Auto-refreshes every 30 seconds</p>
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div class="chart-card">
+              <h4>📈 Weekly Attendance (Last 7 Days)</h4>
+              <div class="chart-wrap"><canvas id="weeklyChart"></canvas></div>
+            </div>
+            <div class="g2">
+              <div class="chart-card">
+                <h4>🍩 Today's Status</h4>
+                <div class="chart-wrap" style="height:170px;"><canvas id="statusChart"></canvas></div>
+              </div>
+              <div class="chart-card">
+                <h4>🏆 Top 5 Attendance</h4>
+                <div class="chart-wrap" style="height:170px;"><canvas id="topChart"></canvas></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <footer class="footer">
+    <span>© 2025 SmartAttend Professional</span>
+    <span id="footerTime">—</span>
+  </footer>
+</div>
+
+<script>
+// CLOCK
+function pad(n){return String(n).padStart(2,'0');}
+function clock(){
+  const now=new Date();
+  const el=document.getElementById('footerTime');
+  if(el)el.textContent=now.toLocaleDateString('en-IN',{weekday:'long',day:'2-digit',month:'short',year:'numeric'})+' · '+pad(now.getHours())+':'+pad(now.getMinutes())+':'+pad(now.getSeconds())+' IST';
+}
+clock(); setInterval(clock,1000);
+
+// QR GENERATOR ─────────────────────────────────────────────────────────────
+const QR_INTERVAL = {{ qr_interval }};
+let countdownTimer = null;
+let recentList = [];
+
+function setStatus(msg, type){
+  const el=document.getElementById('qrStatus');
+  el.className='qr-status '+type;
+  el.innerHTML=msg;
+}
+
+function setDisplay(html){
+  document.getElementById('qrDisplay').innerHTML=html;
+}
+
+function startCountdown(seconds, roll){
+  if(countdownTimer) clearInterval(countdownTimer);
+  let s = seconds;
+  function tick(){
+    const timerEl=document.getElementById('qrCountdown');
+    const progEl=document.getElementById('qrProg');
+    if(!timerEl){ clearInterval(countdownTimer); return; }
+    if(s<=0){
+      clearInterval(countdownTimer);
+      timerEl.textContent='⏰ Expired — regenerate for '+roll;
+      timerEl.style.color='var(--red)';
+      if(progEl) progEl.style.width='0%';
+      setStatus('⏰ QR expired for '+roll+'. Click Generate QR again.','err');
+      return;
+    }
+    timerEl.textContent='⏱ Valid for '+s+'s';
+    if(progEl) progEl.style.width=(s/QR_INTERVAL*100)+'%';
+    if(s<=10) timerEl.style.color='var(--orange)';
+    s--;
+  }
+  tick();
+  countdownTimer=setInterval(tick,1000);
+}
+
+async function generateQR(){
+  const roll=document.getElementById('rollInput').value.trim().toUpperCase();
+  if(!roll){ setStatus('⚠ Please enter a roll number.','err'); return; }
+  const btn=document.getElementById('genBtn');
+  btn.disabled=true; btn.textContent='Generating...';
+  setStatus('<span class="loading">🔄 Validating roll number and generating QR...</span>','loading');
+  setDisplay('<div class="qr-placeholder"><div class="ph-icon loading">⏳</div><span>Generating...</span></div>');
+
+  try{
+    const res=await fetch('/api/generate_qr',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({roll_no:roll})
+    });
+    const d=await res.json();
+
+    if(!d.ok){
+      setStatus('❌ '+d.error,'err');
+      setDisplay('<div class="qr-placeholder"><div class="ph-icon" style="color:var(--red);">⛔</div><span style="color:var(--red);">'+d.error+'</span></div>');
+    } else {
+      setStatus('✅ QR generated for <strong>'+d.roll_no+'</strong> — valid for '+QR_INTERVAL+'s','ok');
+      setDisplay(`
+        <div class="qr-img-ring" style="margin-bottom:4px;">
+          <img src="${d.qr_url}" alt="QR for ${d.roll_no}" id="qrImgMain"/>
+          <div style="position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px;pointer-events:none;">
+          </div>
+        </div>
+        <div class="qr-student-info">
+          <div class="roll">${d.roll_no}</div>
+          <div class="sname">${d.student_name}</div>
+          <div class="semail">${d.student_email}</div>
+        </div>
+        <div class="qr-timer" id="qrCountdown">⏱ Valid for ${d.expires_in}s</div>
+        <div class="prog-bar" style="width:100%;"><div class="prog-fill" id="qrProg" style="width:100%;"></div></div>
+        <p style="font-size:.74rem;color:var(--text3);text-align:center;">Show this QR to student ${d.roll_no} only</p>
+      `);
+      startCountdown(d.expires_in, d.roll_no);
+      addToRecent(d.roll_no, d.student_name);
+    }
+  } catch(e){
+    setStatus('❌ Network error. Please try again.','err');
+  }
+  btn.disabled=false; btn.textContent='Generate QR';
+}
+
+function addToRecent(roll, name){
+  recentList.unshift({roll, name, time: new Date().toLocaleTimeString('en-IN')});
+  if(recentList.length>5) recentList.pop();
+  const cont=document.getElementById('recentList');
+  const wrap=document.getElementById('recentQRs');
+  if(!cont||!wrap) return;
+  wrap.style.display='block';
+  cont.innerHTML=recentList.map(r=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 11px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);cursor:pointer;"
+         onclick="document.getElementById('rollInput').value='${r.roll}';generateQR();">
+      <div><span class="roll-badge" style="font-size:.75rem;">${r.roll}</span> <span style="font-size:.78rem;color:var(--text2);margin-left:6px;">${r.name}</span></div>
+      <span style="font-size:.72rem;color:var(--text3);">${r.time} · click to regenerate</span>
+    </div>
+  `).join('');
+}
+
+// Allow Enter key in roll input
+document.getElementById('rollInput').addEventListener('keydown', e=>{
+  if(e.key==='Enter') generateQR();
+});
+
+// CHARTS ────────────────────────────────────────────────────────────────────
+Chart.defaults.color='#7a9bbf';
+Chart.defaults.font.family="-apple-system,'Segoe UI',system-ui,sans-serif";
+let wC, sC, tC;
+
+async function loadCharts(){
+  try{
+    const d=await(await fetch('/api/chart_data')).json();
+
+    // Weekly
+    if(wC) wC.destroy();
+    wC=new Chart(document.getElementById('weeklyChart'),{
+      type:'bar',
+      data:{
+        labels:d.weekly.map(r=>r.date.slice(5)),
+        datasets:[
+          {label:'Present',data:d.weekly.map(r=>r.present),backgroundColor:'rgba(16,185,129,.7)',borderColor:'#10b981',borderWidth:1,borderRadius:4},
+          {label:'Late',   data:d.weekly.map(r=>r.late),   backgroundColor:'rgba(245,158,11,.65)',borderColor:'#f59e0b',borderWidth:1,borderRadius:4},
+        ]
+      },
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{labels:{color:'#7a9bbf',font:{size:10}}}},
+        scales:{x:{grid:{color:'rgba(26,45,72,.5)'},ticks:{color:'#7a9bbf',font:{size:9}}},
+                y:{grid:{color:'rgba(26,45,72,.5)'},ticks:{color:'#7a9bbf',font:{size:9},stepSize:1},beginAtZero:true}}}
+    });
+
+    // Status donut
+    const sL=d.status.length?d.status.map(r=>r.label):['No Data'];
+    const sC2=d.status.length?d.status.map(r=>r.count):[1];
+    const sCol=sL.map(l=>l==='Present'?'#10b981':l==='Late'?'#f59e0b':l==='Absent'?'#ef4444':'#3d5a7a');
+    if(sC) sC.destroy();
+    sC=new Chart(document.getElementById('statusChart'),{
+      type:'doughnut',
+      data:{labels:sL,datasets:[{data:sC2,backgroundColor:sCol,borderColor:'#121c2e',borderWidth:3}]},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'62%',
+        plugins:{legend:{position:'bottom',labels:{color:'#7a9bbf',font:{size:9},padding:8}}}}
+    });
+
+    // Top students
+    const top5=d.students.slice(0,5);
+    if(tC) tC.destroy();
+    tC=new Chart(document.getElementById('topChart'),{
+      type:'bar',
+      data:{
+        labels:top5.map(r=>r.label),
+        datasets:[{label:'Days',data:top5.map(r=>r.count),
+          backgroundColor:top5.map((_,i)=>`hsl(${200+i*20},65%,50%)`),borderRadius:4}]
+      },
+      options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+        plugins:{legend:{display:false}},
+        scales:{x:{grid:{color:'rgba(26,45,72,.5)'},ticks:{color:'#7a9bbf',font:{size:9},stepSize:1},beginAtZero:true},
+                y:{grid:{display:false},ticks:{color:'#7a9bbf',font:{size:9}}}}}
+    });
+  }catch(e){console.error('Charts:',e);}
+}
+loadCharts(); setInterval(loadCharts,30000);
+</script>
+</body>
+</html>

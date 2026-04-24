@@ -1,0 +1,32 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>Students | SmartAttend</title><link rel="stylesheet" href="{{ url_for('static',filename='style.css') }}"/></head>
+<body><div class="page-wrap">
+<nav class="navbar"><a href="/" class="nav-brand"><div class="brand-ring">📡</div>Smart<span class="brand-acc">Attend</span></a><div class="nav-links"><a href="/faculty_dashboard" class="nl">Dashboard</a><a href="/report" class="nl">Reports</a><a href="/logout" class="nl nl-d">Logout</a></div></nav>
+<div class="main">
+  <div class="ph a1"><h1>Registered Students</h1><p>All students with their roll numbers — click a roll number to generate QR</p></div>
+  <div class="section2 a2" style="padding-top:0;padding-bottom:60px;">
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Roll Number</th><th>Name</th><th>Email</th><th>Action</th></tr></thead>
+        <tbody>
+          {% for s in students %}
+          <tr>
+            <td class="td-muted">{{ loop.index }}</td>
+            <td class="td-roll">{{ s.roll_no }}</td>
+            <td>{{ s.name or '—' }}</td>
+            <td class="td-mono" style="font-size:.77rem;">{{ s.email }}</td>
+            <td><a href="/faculty_dashboard" onclick="sessionStorage.setItem('autoRoll','{{ s.roll_no }}')" class="btn btn-p" style="font-size:.76rem;padding:6px 12px;">Generate QR →</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<footer class="footer"><span>© 2025 SmartAttend Professional</span><a href="/faculty_dashboard">← Dashboard</a></footer>
+</div>
+<script>
+// Auto-fill roll number if navigated from student list
+const ar=sessionStorage.getItem('autoRoll');
+if(ar){sessionStorage.removeItem('autoRoll');}
+</script>
+</body></html>

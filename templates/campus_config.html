@@ -1,0 +1,21 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>GPS Config | SmartAttend</title><link rel="stylesheet" href="{{ url_for('static',filename='style.css') }}"/></head>
+<body><div class="page-wrap">
+<nav class="navbar"><a href="/" class="nav-brand"><div class="brand-ring">📡</div>Smart<span class="brand-acc">Attend</span></a><div class="nav-links"><a href="/faculty_dashboard" class="nl">← Dashboard</a><a href="/logout" class="nl nl-d">Logout</a></div></nav>
+<div class="auth-page" style="align-items:flex-start;padding-top:48px;">
+  <div style="width:100%;max-width:500px;" class="a1">
+    <div class="card">
+      <span style="font-size:2rem;display:block;margin-bottom:12px;">📍</span>
+      <h2 style="font-size:1.5rem;font-weight:800;letter-spacing:-.025em;margin-bottom:4px;">Campus GPS Configuration</h2>
+      <p style="font-size:.85rem;color:var(--text2);margin-bottom:22px;">Set campus center and radius. Students outside the radius cannot mark attendance.</p>
+      <form method="POST" action="/campus_config">
+        <div class="fg"><label class="flbl">Campus Latitude</label><input class="finp" type="number" name="lat" step="0.000001" value="{{ campus.lat }}" required placeholder="e.g. 17.4065"/></div>
+        <div class="fg"><label class="flbl">Campus Longitude</label><input class="finp" type="number" name="lng" step="0.000001" value="{{ campus.lng }}" required placeholder="e.g. 78.4772"/></div>
+        <div class="fg"><label class="flbl">Allowed Radius (metres)</label><input class="finp" type="number" name="radius" step="1" value="{{ campus.radius|int }}" required min="50" max="5000" placeholder="e.g. 500"/></div>
+        <div class="info-box" style="margin-bottom:16px;"><p>💡 Getting coordinates</p><ul><li>Open Google Maps → right-click your campus</li><li>Copy coordinates e.g. 17.4065, 78.4772</li><li>Typical campus radius: 200–500m</li></ul></div>
+        <button type="submit" class="btn btn-p btn-block">Save Configuration</button>
+      </form>
+    </div>
+  </div>
+</div>
+<footer class="footer"><span>© 2025 SmartAttend</span><a href="/faculty_dashboard">← Dashboard</a></footer>
+</div></body></html>

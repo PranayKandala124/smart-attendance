@@ -1,0 +1,17 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>Analytics | SmartAttend</title><link rel="stylesheet" href="{{ url_for('static',filename='style.css') }}"/></head>
+<body><div class="page-wrap">
+<nav class="navbar"><a href="/" class="nav-brand"><div class="brand-ring">📡</div>Smart<span class="brand-acc">Attend</span></a><div class="nav-links"><a href="/faculty_dashboard" class="nl">Dashboard</a><a href="/report" class="nl">Reports</a><a href="/export" class="nl">Export</a><a href="/logout" class="nl nl-d">Logout</a></div></nav>
+<div class="main">
+  <div class="ph a1"><h1>Attendance Analytics</h1><p>Cumulative attendance per student sorted by roll number</p></div>
+  <div class="section2 a2" style="padding-top:0;padding-bottom:60px;">
+    <div class="card" style="padding:20px;"><img src="{{ url_for('static',filename='graph.png') }}?t={{ range(1,9999)|random }}" alt="Analytics" class="graph-img"/></div>
+    <div style="margin-top:14px;display:flex;gap:9px;flex-wrap:wrap;">
+      <a href="/report"   class="btn btn-o">📋 Report</a>
+      <a href="/export"   class="btn btn-gh">📥 Excel</a>
+      <a href="/export_pdf" class="btn btn-gh">📄 PDF</a>
+      <a href="/faculty_dashboard" class="btn btn-p">← Dashboard</a>
+    </div>
+  </div>
+</div>
+<footer class="footer"><span>© 2025 SmartAttend Professional</span><a href="/faculty_dashboard">← Dashboard</a></footer>
+</div></body></html>

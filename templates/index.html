@@ -1,0 +1,32 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>Smart Attendance System | Roll-No QR Dashboard</title><link rel="stylesheet" href="{{ url_for('static',filename='style.css') }}"/></head>
+<body><div class="page-wrap">
+<nav class="navbar"><a href="/" class="nav-brand"><div class="brand-ring">📡</div>Smart<span class="brand-acc">Attend</span></a><div class="nav-links"><a href="/student_login" class="nl">Student Login</a><a href="/faculty_login" class="nl nl-p">Faculty Login</a></div></nav>
+<div class="main">
+  <div class="hero a1">
+    <div class="hero-pill"><span class="live-dot"></span>Roll-No QR · GPS · bcrypt · Anti-Proxy</div>
+    <h1>Smart Attendance System<br>Using QR and Web Dashboard <span class="hl"></span></h1>
+    <p>Each student gets their own unique QR code. Wrong roll number = invalid QR. Combined with GPS and time-rules for bulletproof attendance.</p>
+    <div class="cta-row"><a href="/student_login" class="btn btn-p btn-lg">Student Portal →</a><a href="/faculty_login" class="btn btn-o btn-lg">Faculty Dashboard</a></div>
+  </div>
+  <div class="div"></div>
+  <div class="section a2">
+    <div style="text-align:center;margin-bottom:34px;"><p class="stitle" style="font-size:1.25rem;">Professional Features</p><p style="font-size:.87rem;color:var(--text2);">Built to eliminate fraud, built for real institutions</p></div>
+    <div class="g3">
+      <div class="feat-card"><span class="fi">🎯</span><h3>Per-Student Unique QR</h3><p>Faculty enters a roll number (e.g. 24B81A3235) and a unique QR is generated. Only that student can use it — logged in as the right roll number.</p></div>
+      <div class="feat-card"><span class="fi">🚫</span><h3>Proxy Proof System</h3><p>QR is tied to roll number + session token + single-use. Screenshots invalid after 60s. Wrong roll = rejected. Different login = rejected.</p></div>
+      <div class="feat-card"><span class="fi">📍</span><h3>GPS Campus Lock</h3><p>Students outside the campus radius cannot mark attendance regardless of QR. Distance calculated with Haversine formula.</p></div>
+      <div class="feat-card"><span class="fi">⏰</span><h3>Time-Based Status</h3><p>Before 9:30 = Present · 9:30–10:00 = Late · After 10:00 = Absent. Automated, no manual intervention.</p></div>
+      <div class="feat-card"><span class="fi">📊</span><h3>Chart.js Analytics</h3><p>Weekly bar charts, daily status donut, top attendance ranking — all live on faculty dashboard via API.</p></div>
+      <div class="feat-card"><span class="fi">📥</span><h3>Excel &amp; PDF Export</h3><p>Export with Roll No + Name + Email + Timestamp + Status. PDF uses ReportLab for professional formatted reports.</p></div>
+    </div>
+  </div>
+  <div class="div"></div>
+  <div class="section a3" style="text-align:center;">
+    <p style="font-size:.71rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--text3);margin-bottom:12px;">GET STARTED</p>
+    <h2 style="font-size:1.6rem;font-weight:800;letter-spacing:-.025em;margin-bottom:9px;">New to SmartAttend?</h2>
+    <p style="color:var(--text2);font-size:.89rem;margin-bottom:28px;">Register in 30 seconds. Roll number required for students.</p>
+    <div class="cta-row"><a href="/signup" class="btn btn-p btn-lg">Register as Student</a><a href="/faculty_signup" class="btn btn-gh btn-lg">Register as Faculty</a></div>
+  </div>
+</div>
+<footer class="footer"><span>© 2025 SmartAttend Professional</span><span>Per-Student QR · GPS · bcrypt · Chart.js</span></footer>
+</div></body></html>

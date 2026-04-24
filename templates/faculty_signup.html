@@ -1,0 +1,17 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>Faculty Sign Up | SmartAttend</title><link rel="stylesheet" href="{{ url_for('static',filename='style.css') }}"/></head>
+<body><div class="page-wrap">
+<nav class="navbar"><a href="/" class="nav-brand"><div class="brand-ring">📡</div>Smart<span class="brand-acc">Attend</span></a><div class="nav-links"><a href="/faculty_login" class="nl">Login</a><a href="/signup" class="nl nl-p">Student Sign Up</a></div></nav>
+<div class="auth-page"><div class="auth-card card a1">
+  <span class="auth-icon">🏫</span>
+  <h2>Faculty Registration</h2><p class="sub">Create your account to manage attendance sessions</p>
+  {% if error %}<div class="alert a-err">⚠ {{ error }}</div>{% endif %}
+  <form method="POST" action="/faculty_signup">
+    <div class="fg"><label class="flbl">Username</label><input class="finp" type="text" name="username" placeholder="e.g. prof_sharma" required/></div>
+    <div class="fg"><label class="flbl">Password</label><input class="finp" type="password" name="password" placeholder="Min 6 chars + number + symbol" required/></div>
+    <div class="pw-hint"><strong>Password requirements:</strong>At least 6 chars · lowercase · number · special char <code>@ # $ % ^ &amp; *</code></div>
+    <button type="submit" class="btn btn-p btn-block">Register as Faculty →</button>
+  </form>
+  <p class="auth-foot">Already registered? <a href="/faculty_login">Sign In</a></p>
+</div></div>
+<footer class="footer"><span>© 2025 SmartAttend</span><a href="/">← Home</a></footer>
+</div></body></html>

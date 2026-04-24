@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Attendance Report | SmartAttend</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
+</head>
+<body>
+<div class="page-wrap">
+  <nav class="navbar">
+    <a href="/" class="nav-brand"><div class="brand-ring">📡</div>Smart<span class="brand-acc">Attend</span></a>
+    <div class="nav-links">
+      <a href="/faculty_dashboard" class="nl">Dashboard</a>
+      <a href="/graph"  class="nl">Analytics</a>
+      <a href="/export" class="nl">Excel</a>
+      <a href="/export_pdf?date={{ selected_date }}" class="nl">PDF</a>
+      <a href="/logout" class="nl nl-d">Logout</a>
+    </div>
+  </nav>
+
+  <div class="main">
+    <div class="ph a1">
+      <h1>Attendance Report</h1>
+      <p>Roll number · Name · Email · Timestamp · Status for every attendance record</p>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="section2 a2" style="padding-top:0;">
+      <form method="POST" action="/report">
+        <div class="toolbar">
+          <input class="date-inp" type="date" name="date" value="{{ selected_date }}"/>
+          <button type="submit" class="btn btn-p">View Report</button>
+          <a href="/report?mode=daily"  class="btn {% if view_mode=='daily' %}btn-p{% else %}btn-gh{% endif %}">📋 Daily</a>
+          <a href="/report?mode=weekly" class="btn {% if view_mode=='weekly' %}btn-p{% else %}btn-gh{% endif %}">📅 Weekly</a>
+          <a href="/export" class="btn btn-gh">📥 Excel</a>
+          <a href="/export_pdf?date={{ selected_date }}" class="btn btn-gh">📄 PDF</a>
+        </div>
+      </form>
+    </div>
+
+    <!-- SUMMARY STATS -->
+    <div class="section2 a3" style="padding-top:0;">
+      <div class="g4">
+        <div class="stat-card"><div class="stat-icon ic-b">📅</div><div class="stat-val sv-a" style="font-size:.95rem;">{{ selected_label }}</div><div class="stat-lbl">Period</div></div>
+        <div class="stat-card"><div class="stat-icon ic-g">✅</div><div class="stat-val sv-g">{{ present_ct }}</div><div class="stat-lbl">Present</div></div>
+        <div class="stat-card"><div class="stat-icon ic-o">⏰</div><div class="stat-val sv-o">{{ late_ct }}</div><div class="stat-lbl">Late</div></div>
+        <div class="stat-card">
+          <div class="stat-icon ic-p">📊</div>
+          <div class="stat-val" style="color:var(--purple);">{{ pct }}%</div>
+          <div class="stat-lbl">Rate (of {{ total_students }} students)</div>
+          <div class="prog-bar"><div class="prog-fill" style="width:{{ pct }}%;"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="section2 a4" style="padding-top:0;padding-bottom:60px;">
+      {% if data %}
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Roll Number</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Timestamp (IST)</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in data %}
+            <tr>
+              <td class="td-muted">{{ loop.index }}</td>
+              <td class="td-roll">{{ row[1] }}</td>
+              <td>{{ row[2] or '—' }}</td>
+              <td class="td-mono" style="font-size:.77rem;">{{ row[3] }}</td>
+              <td class="td-mono">{{ row[4] }}</td>
+              <td>
+                {% if row[5]=='Present' %}<span class="badge bg-g">✓ Present</span>
+                {% elif row[5]=='Late'    %}<span class="badge bg-o">⏰ Late</span>
+                {% else                  %}<span class="badge bg-r">✗ Absent</span>{% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="card"><div class="empty"><div class="ei">📭</div><h3>No records found</h3><p>No attendance for <strong>{{ selected_label }}</strong>. Try another date.</p></div></div>
+      {% endif %}
+    </div>
+
+  </div>
+
+  <footer class="footer"><span>© 2025 SmartAttend Professional</span><a href="/faculty_dashboard">← Dashboard</a></footer>
+</div>
+</body>
+</html>

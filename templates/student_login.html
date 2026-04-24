@@ -1,0 +1,17 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>Student Login | SmartAttend</title><link rel="stylesheet" href="{{ url_for('static',filename='style.css') }}"/></head>
+<body><div class="page-wrap">
+<nav class="navbar"><a href="/" class="nav-brand"><div class="brand-ring">📡</div>Smart<span class="brand-acc">Attend</span></a><div class="nav-links"><a href="/signup" class="nl">Sign Up</a><a href="/faculty_login" class="nl nl-p">Faculty Login</a></div></nav>
+<div class="auth-page"><div class="auth-card card a1">
+  <span class="auth-icon">🎓</span>
+  <h2>Student Login</h2>
+  <p class="sub">Sign in with your roll number or email</p>
+  {% if error %}<div class="alert a-err">⚠ {{ error }}</div>{% endif %}
+  <form method="POST" action="/student_login">
+    <div class="fg"><label class="flbl">Roll Number or Email</label><input class="finp" type="text" name="identifier" placeholder="24B81A3235 or you@email.com" required/></div>
+    <div class="fg"><label class="flbl">Password</label><input class="finp" type="password" name="password" placeholder="Your password" required/></div>
+    <button type="submit" class="btn btn-p btn-block" style="margin-top:4px;">Sign In →</button>
+  </form>
+  <p class="auth-foot">Don't have an account? <a href="/signup">Register here</a></p>
+</div></div>
+<footer class="footer"><span>© 2025 SmartAttend</span><a href="/">← Home</a></footer>
+</div></body></html>

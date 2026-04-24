@@ -1,0 +1,36 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>Student Sign Up | SmartAttend</title><link rel="stylesheet" href="{{ url_for('static',filename='style.css') }}"/></head>
+<body><div class="page-wrap">
+<nav class="navbar"><a href="/" class="nav-brand"><div class="brand-ring">📡</div>Smart<span class="brand-acc">Attend</span></a><div class="nav-links"><a href="/student_login" class="nl">Login</a><a href="/faculty_signup" class="nl nl-p">Faculty Sign Up</a></div></nav>
+<div class="auth-page"><div class="auth-card card a1">
+  <span class="auth-icon">🎓</span>
+  <h2>Create Student Account</h2>
+  <p class="sub">Register with your roll number and institution email</p>
+  {% if error %}<div class="alert a-err">⚠ {{ error }}</div>{% endif %}
+  <form method="POST" action="/signup">
+    <div class="fg">
+      <label class="flbl">Roll Number <span style="color:var(--red);">*</span></label>
+      <input class="finp roll-input" type="text" name="roll_no" placeholder="e.g. 24B81A3235" maxlength="10" oninput="validateRoll(this)" required/>
+      <div id="rollHint" style="font-size:.74rem;margin-top:5px;color:var(--text3);">Format: 24B81A3235 (2 digits + B + 2 digits + A + 4 digits)</div>
+    </div>
+    <div class="fg"><label class="flbl">Full Name</label><input class="finp" type="text" name="name" placeholder="Your full name"/></div>
+    <div class="fg"><label class="flbl">Email Address <span style="color:var(--red);">*</span></label><input class="finp" type="email" name="email" placeholder="you@institution.edu" required/></div>
+    <div class="fg"><label class="flbl">Password <span style="color:var(--red);">*</span></label><input class="finp" type="password" name="password" placeholder="Min 6 chars + number + symbol" required/></div>
+    <div class="pw-hint"><strong>Password requirements:</strong>At least 6 chars · lowercase · number · special char <code>@ # $ % ^ &amp; *</code></div>
+    <button type="submit" class="btn btn-p btn-block">Create Account →</button>
+  </form>
+  <p class="auth-foot">Already registered? <a href="/student_login">Sign In</a></p>
+  <p class="auth-foot" style="margin-top:5px;">Faculty? <a href="/faculty_signup">Faculty Sign Up</a></p>
+</div></div>
+<footer class="footer"><span>© 2025 SmartAttend</span><a href="/">← Home</a></footer>
+</div>
+<script>
+function validateRoll(el){
+  el.value=el.value.toUpperCase();
+  const v=/^\d{2}B\d{2}A\d{4}$/.test(el.value);
+  const hint=document.getElementById('rollHint');
+  if(el.value.length===0){hint.textContent='Format: 24B81A3235 (2 digits + B + 2 digits + A + 4 digits)';hint.style.color='var(--text3)';}
+  else if(v){hint.textContent='✓ Valid roll number format';hint.style.color='var(--green)';}
+  else{hint.textContent='✗ Invalid format. Example: 24B81A3235';hint.style.color='var(--red)';}
+}
+</script>
+</body></html>
