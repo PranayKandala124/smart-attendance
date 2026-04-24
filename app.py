@@ -305,30 +305,30 @@ def student_login():
 @app.route("/faculty_signup", methods=["GET", "POST"])
 def faculty_signup():
     if request.method == "POST":
-      username = request.form.get("username", "").strip()
-password = request.form.get("password", "")
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+
         if not valid_pw(password):
-            return render_template("faculty_signup.html", error="Weak password.")
-try:
-    c = get_db()
-    cur = c.cursor()
+            return render_template("faculty_signup.html", error="Weak password")
 
-    cur.execute(
-        "INSERT INTO faculty(username,password) VALUES(?,?)",
-        (username, hash_pw(password))
-    )
+        try:
+            c = get_db()
+            cur = c.cursor()
 
-    c.commit()
-    c.close()
+            cur.execute(
+                "INSERT INTO faculty(username,password) VALUES(?,?)",
+                (username, hash_pw(password))
+            )
 
-    return redirect("/faculty_login")
+            c.commit()
+            c.close()
 
-except sqlite3.IntegrityError:
-    return render_template("faculty_signup.html", error="User already exists")
+            return redirect("/faculty_login")
 
-except Exception as e:
-    print("ERROR:", e)
-    return "Something went wrong"
+        except sqlite3.IntegrityError:
+            return render_template("faculty_signup.html", error="User already exists")
+
+    return render_template("faculty_signup.html")
 
 @app.route("/faculty_login", methods=["GET", "POST"])
 def faculty_login():
